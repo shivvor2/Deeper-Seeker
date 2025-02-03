@@ -10,7 +10,7 @@ The tool is built to:
 
 ---
 
-![Demo video](final_v1.gif)
+![Demo video](public/final_v1.gif)
 
 ## Key Features
 1. **Iterative Research Workflow:**
