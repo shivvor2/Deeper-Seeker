@@ -142,25 +142,17 @@ Contributions are welcome! Please follow these steps:
 
 ---
 
-## License
-This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
-
----
 
 ## Acknowledgments
 - **Exa AI**: For providing the web search API.
 - **OpenAI**: For powering the AI reasoning and planning capabilities.
-- **Colorama**: For enhancing console output readability.
-
 ---
 
-## Contact
-For questions or feedback, please open an issue on GitHub or contact the maintainer at [your.email@example.com].
-
----
 
 ## Future Enhancements
-- Add support for additional data sources (e.g., Crunchbase, Statista).
+- Improve reasoning and task planning
+- Enhance the web content extraction with firecrawl.
+- Add support for additional data sources.
 - Implement a web-based interface for easier interaction.
 - Enable export of reports in multiple formats (PDF, Markdown, etc.).
 - Add advanced analytics and visualization capabilities.
