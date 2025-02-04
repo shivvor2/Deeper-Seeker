@@ -11,7 +11,7 @@ The tool is built to:
 ---
 
 ![Demo video](public/final_v1.gif)
-
+[![Star History Chart](https://api.star-history.com/svg?repos=HarshJ23/Deeper-Seeker&type=Date)](https://star-history.com/#HarshJ23/Deeper-Seeker&Date)
 ## Key Features
 1. **Iterative Research Workflow:**
    - Plans research steps based on user queries.
