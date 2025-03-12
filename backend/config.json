@@ -1,0 +1,36 @@
+{
+    "ai_providers": {
+      "followup": "openai",
+      "research_plan": "openai",
+      "query_generation": "openai",
+      "report_generation": "openai"
+    },
+    "models": {
+      "openai": {
+        "followup": "gpt-4-turbo",
+        "research_plan": "gpt-4-turbo",
+        "query_generation": "gpt-4-turbo",
+        "report_generation": "gpt-4-turbo"
+      },
+      "groq": {
+        "followup": "llama-3.3-70b-versatile",
+        "research_plan": "llama-3.3-70b-versatile",
+        "query_generation": "llama-3.3-70b-versatile",
+        "report_generation": "llama-3.3-70b-versatile"
+      },
+      "gemini": {
+        "followup": "gemini-1.5-pro",
+        "research_plan": "gemini-1.5-pro",
+        "query_generation": "gemini-1.5-pro",
+        "report_generation": "gemini-2.0-flash"
+      }
+    },
+    "search": {
+      "provider": "exa"
+    },
+    "settings": {
+        "followup_iterations": 3,
+        "report_save_path": "/reports",
+        "report_name_format": "final_report_{date}_{n}.md"
+    }
+  }
