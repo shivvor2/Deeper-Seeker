@@ -7,10 +7,10 @@
     },
     "models": {
       "openai": {
-        "followup": "gpt-4-turbo",
-        "research_plan": "gpt-4-turbo",
-        "query_generation": "gpt-4-turbo",
-        "report_generation": "gpt-4-turbo"
+        "followup": "nousresearch/hermes-3-llama-3.1-405b",
+        "research_plan": "nousresearch/hermes-3-llama-3.1-405b",
+        "query_generation": "nousresearch/hermes-3-llama-3.1-405b",
+        "report_generation": "nousresearch/hermes-3-llama-3.1-405b"
       },
       "groq": {
         "followup": "llama-3.3-70b-versatile",

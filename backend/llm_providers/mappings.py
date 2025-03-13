@@ -27,3 +27,4 @@ GENERATE_REPORT: Dict[str, Callable[..., Any]] = {
     "groq": openai_impl.generate_report,
     "gemini": google_genai_impl.generate_report
 }
+

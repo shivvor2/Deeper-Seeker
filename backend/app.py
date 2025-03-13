@@ -1,4 +1,6 @@
 from typing import List, Dict, Any, Callable
+from functools import partial
+import sys
 import os
 import requests
 import json
@@ -13,7 +15,9 @@ from exa_py import Exa
 from google import genai
 from dotenv import load_dotenv
 
-from .llm_providers.mappings import (
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+
+from llm_providers.mappings import (
     GENERATE_FOLLOWUP, 
     GENERATE_RESEARCH_PLAN, 
     GENERATE_QUERIES_FOR_STEP, 
@@ -44,9 +48,12 @@ GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 GEMINI_MODEL = os.getenv("GEMINI_MODEL")
 gemini_client = genai.Client(api_key=GEMINI_API_KEY)
 
-# App config (see config.json)
-config_path = os.getenv("CONFIG_PATH") # Relative to app.py
+# Configuration and client setup
+
+config_path = os.getenv("CONFIG_PATH", "config.json")
 config_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), config_path)
+with open(config_path, 'r') as file:
+    config = json.load(file)
 
 clients = {
     "openai": openai_client,
@@ -54,32 +61,64 @@ clients = {
     "gemini": gemini_client
 }
 
-with open(config_path, 'r') as file:
-    config = json.load(file)
+def get_service_and_model(operation: str) -> tuple[str, str]:
+    """Get the service provider and model for a specific operation."""
+    service = config["ai_providers"][operation]
+    model = config["models"][service][operation]
+    return service, model
 
-# Which LLM service to be used for each step
-service_followup: str = config["ai_providers"]["followup"]
-service_research_plan: str = config["ai_providers"]["research_plan"]
-service_queries_for_step: str = config["ai_providers"]["query_generation"]
-service_report: str = config["ai_providers"]["report_generation"]
+# Function to get service, model, and implementation function for an operation
+def get_operation_config(operation: str):
+    """Get the service, model, and function for a specific operation."""
+    # Map operations to their function mappings
+    operation_mappings = {
+        "followup": GENERATE_FOLLOWUP,
+        "research_plan": GENERATE_RESEARCH_PLAN,
+        "query_generation": GENERATE_QUERIES_FOR_STEP,
+        "report_generation": GENERATE_REPORT
+    }
+    
+    service = config["ai_providers"][operation]
+    model = config["models"][service][operation]
+    function = operation_mappings[operation][service]
+    
+    return {
+        "function": function,
+        "service": service,
+        "model": model,
+        "client": clients[service]
+    }
 
-# Exact model name for each step
-model_followup: str = config["models"][service_followup]["followup"]
-model_research_plan: str = config["models"][service_research_plan]["research_plan"]
-model_query_for_step: str = config["models"][service_queries_for_step]["query_generation"]
-model_report: str = config["models"][service_report]["report_generation"]
+# Get configurations for each operation
+followup_config = get_operation_config("followup")
+research_plan_config = get_operation_config("research_plan")
+query_generation_config = get_operation_config("query_generation")
+report_generation_config = get_operation_config("report_generation")
 
-# We do not set the types of the callable since the code structure is not yet stable
-generate_followup: Callable[..., Any] = GENERATE_FOLLOWUP[service_followup]
-generate_research_plan: Callable[..., Any] = GENERATE_RESEARCH_PLAN[service_research_plan]
-generate_queries_for_step: Callable[..., Any] = GENERATE_QUERIES_FOR_STEP[service_queries_for_step]
-generate_report: Callable[..., Any] = GENERATE_REPORT[service_report]
+# Create partially applied functions with client and model already bound
+generate_followup = partial(
+    followup_config["function"], 
+    client=followup_config["client"], 
+    model=followup_config["model"]
+)
 
-# Function to write output to output.md
-# def write_output_to_file(output: str, filename: str = "output.md"):
-#     """Write the output to a markdown file."""
-#     with open(filename, "a") as file:
-#         file.write(output + "\n\n")
+generate_research_plan = partial(
+    research_plan_config["function"], 
+    client=research_plan_config["client"], 
+    model=research_plan_config["model"]
+)
+
+generate_queries_for_step = partial(
+    query_generation_config["function"], 
+    client=query_generation_config["client"], 
+    model=query_generation_config["model"]
+)
+
+generate_report = partial(
+    report_generation_config["function"], 
+    client=report_generation_config["client"], 
+    model=report_generation_config["model"]
+)
 
 # Functions
 
@@ -88,7 +127,7 @@ def run_followup_loop(initial_query: str, iterations: int = 3) -> Dict[str, Any]
     context = initial_query
     history = []
     for i in range(iterations):
-        followup = generate_followup(client = clients[service_followup],model = model_followup, context = context)
+        followup = generate_followup(context = context)
         question = followup.get("question", "Could you elaborate?")
         print(f"\nAssistant: {question}")
         user_answer = input("Your response: ")
@@ -114,7 +153,7 @@ def execute_plan(plan_steps: Dict[str, str]) -> Dict:
 
     for step, description in plan_steps.items():
         # Generate search queries for the step
-        search_queries = generate_queries_for_step(client = clients[service_queries_for_step], model = model_query_for_step, step = step, description = description)
+        search_queries = generate_queries_for_step(step = step, description = description)
         
         if step in search_queries:
             queries = search_queries[step].get("search_queries", [])
@@ -250,7 +289,7 @@ def generate_unique_filename(base_format: str, save_path: str) -> str:
     return str(save_path / filename)
 
 # save the report to a markdown file
-def save_report_to_file(report: str, config: dict):
+def save_report_to_file(report: str):
     """Save the generated report to a markdown file."""
     save_path = config['settings'].get('report_save_path', 'reports')
     name_format = config['settings'].get('report_name_format', 'final_report_{n}.md')
@@ -268,7 +307,7 @@ if __name__ == "__main__":
 
     initial_query = input("Enter your query:")
     followup_result = run_followup_loop(initial_query, iterations=3)
-    research_plan = generate_research_plan(client = clients[service_research_plan], model = model_research_plan, initial_query = followup_result["initial_query"], followup_context = followup_result["final_context"])
+    research_plan = generate_research_plan(initial_query = followup_result["initial_query"], followup_context = followup_result["final_context"])
     plan_steps = research_plan["plan"]
     result = execute_plan(plan_steps)
 
@@ -276,7 +315,7 @@ if __name__ == "__main__":
     learnings_string = extract_learnings(result)
 
     # report generation call
-    report = generate_report(client = clients[service_report], model = model_report, prompt = initial_query, learnings = learnings_string)
+    report = generate_report(prompt = initial_query, learnings = learnings_string)
 
     # Save the report
     save_report_to_file(report)
