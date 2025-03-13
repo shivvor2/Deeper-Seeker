@@ -3,6 +3,8 @@ from google.genai import types
 from pydantic import BaseModel
 from typing import Dict
 
+from prompts import FOLLOWUP_PROMPT, RESEARCH_PLAN_PROMPT, GEN_QUERY_PROMPT, GEN_REPORT_PROMPT
+
 class ReportResponse(BaseModel):
     reportMarkdown: str
 

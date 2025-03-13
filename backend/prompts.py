@@ -27,3 +27,22 @@ Return 3 search queries for each step in JSON format as follows:
  "search_queries": ["query1", "query2", "query3"]
 }
 """
+
+GEN_REPORT_PROMPT = """You are a professional research analyst. Your task is to generate a detailed 3-page markdown report based on the provided research data.
+
+Given the following prompt from the user, write a final report on the topic using the learnings from research. The report should be very detailed with inline citations in markdown format :- (text)[source link] in each subsection.
+
+User Prompt: {prompt}
+
+Here are all the learnings from research:
+{learnings}
+
+Your report should:
+1. Include an executive summary
+2. Organize findings into logical sections
+3. Provide detailed analysis of the research data
+4. Include ALL the relevant learnings from the provided data
+5. Format the report in clean, professional markdown
+6. Use inline citations to reference sources
+7. Aim for a comprehensive 3+ page report
+"""

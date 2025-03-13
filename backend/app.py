@@ -39,14 +39,12 @@ OPENAI_BASE_URL = os.getenv("OPENAI_BASE_URL")
 openai_client = OpenAI(api_key = OPENAI_API_KEY)
 
 # Groq
-GROQ_API_KEY = os.getenv("GROQ_API_KEY")
-GROQ_MODEL = os.getenv("GROQ_MODEL")
+GROQ_API_KEY = os.getenv("GROQ_API_KEY", "")
 groq_client = Groq(api_key=GROQ_API_KEY)
 
 # Gemini
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
-GEMINI_MODEL = os.getenv("GEMINI_MODEL")
-gemini_client = genai.Client(api_key=GEMINI_API_KEY)
+gemini_client = genai.Client(api_key=GEMINI_API_KEY) if GEMINI_API_KEY else None # Gemini client wont load lazily for some reason
 
 # Configuration and client setup
 
@@ -306,7 +304,7 @@ if __name__ == "__main__":
     # open("output.md", "w").close()
 
     initial_query = input("Enter your query:")
-    followup_result = run_followup_loop(initial_query, iterations=3)
+    followup_result = run_followup_loop(initial_query, iterations=config["settings"]["followup_iterations"])
     research_plan = generate_research_plan(initial_query = followup_result["initial_query"], followup_context = followup_result["final_context"])
     plan_steps = research_plan["plan"]
     result = execute_plan(plan_steps)

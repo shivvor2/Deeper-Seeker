@@ -1,6 +1,6 @@
 from typing import Dict, Callable, Any
-from . import google_genai_impl
-from . import openai_impl
+import llm_providers.google_genai_impl as google_genai_impl
+import llm_providers.openai_impl as openai_impl
 
 # We do not set the types of the callable since the code structure is not yet stable
 

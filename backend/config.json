@@ -29,7 +29,7 @@
       "provider": "exa"
     },
     "settings": {
-        "followup_iterations": 3,
+        "followup_iterations": 1,
         "report_save_path": "/reports",
         "report_name_format": "final_report_{date}_{n}.md"
     }
